@@ -26,4 +26,4 @@ An interactive web application that showcases fascinating facts about galaxies, 
 
 1. Clone the repository:
 ```bash
-git clone [your-repository-url]
+git clone https://github.com/AK24-EM/space-facts
