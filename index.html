@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Facts Explorer</title>
+    <style>
+        body {
+            background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #64ffda;
+            text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+        }
+
+        .fact-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .fact-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .fact-text {
+            font-size: 1.8em;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .category {
+            color: #64ffda;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            font-size: 1.1em;
+            margin-top: 20px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            background: transparent;
+            color: #64ffda;
+            border: 2px solid #64ffda;
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: #64ffda;
+            color: #24243e;
+            box-shadow: 0 0 20px rgba(100, 255, 218, 0.4);
+        }
+
+        .progress {
+            text-align: center;
+            margin-top: 20px;
+            color: #64ffda;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Cosmic Facts Explorer</h1>
+        <div class="fact-card fade-in">
+            <p class="fact-text" id="factText"></p>
+            <p class="category" id="category"></p>
+        </div>
+        <div class="controls">
+            <button onclick="previousFact()">Previous</button>
+            <button onclick="randomFact()">Random</button>
+            <button onclick="nextFact()">Next</button>
+        </div>
+        <div class="progress">
+            Fact <span id="currentIndex">1</span> of <span id="totalFacts">20</span>
+        </div>
+    </div>
+
+    <script>
+        const galaxyFacts = {
+          "galaxy_facts": [
+            {"id": 1, "fact": "The Milky Way has 100-400 billion stars", "category": "size"},
+            {"id": 2, "fact": "Andromeda Galaxy is 2.537 million light-years from Earth", "category": "distance"},
+            {"id": 3, "fact": "Over 100 billion galaxies exist in the observable universe", "category": "quantity"},
+            {"id": 4, "fact": "IC 1101 is 50 times larger than the Milky Way", "category": "size"},
+            {"id": 5, "fact": "Most galaxies have a supermassive black hole at their center", "category": "structure"},
+            {"id": 6, "fact": "Three main galaxy types exist: spiral, elliptical, and irregular", "category": "classification"},
+            {"id": 7, "fact": "Milky Way will collide with Andromeda in 4.5 billion years", "category": "future_event"},
+            {"id": 8, "fact": "Smallest dwarf galaxies contain only 1,000 stars", "category": "size"},
+            {"id": 9, "fact": "Galaxy comes from Greek 'galaxias' meaning milky", "category": "etymology"},
+            {"id": 10, "fact": "GN-z11 is the most distant galaxy at 13.4 billion light-years", "category": "distance"},
+            {"id": 11, "fact": "Galaxies form clusters held together by gravity", "category": "structure"},
+            {"id": 12, "fact": "Milky Way rotates at 600 km per second", "category": "motion"},
+            {"id": 13, "fact": "Dark matter is 85% of most galaxies' mass", "category": "composition"},
+            {"id": 14, "fact": "Sombrero Galaxy looks like a Mexican hat", "category": "naming"},
+            {"id": 15, "fact": "Starburst galaxies form stars at 100x normal rates", "category": "formation"},
+            {"id": 16, "fact": "Large Magellanic Cloud visible from Southern Hemisphere", "category": "observation"},
+            {"id": 17, "fact": "Stars rarely collide during galaxy mergers", "category": "collision"},
+            {"id": 18, "fact": "Milky Way is 13.6 billion years old", "category": "age"},
+            {"id": 19, "fact": "Galaxy clusters are the largest gravity-bound structures", "category": "structure"},
+            {"id": 20, "fact": "Earth is 27,000 light-years from galactic center", "category": "location"}
+            ]
+        };
+
+        let currentIndex = 0;
+        let factHistory = [];
+
+        function displayFact(index) {
+            const factCard = document.querySelector('.fact-card');
+            factCard.classList.remove('fade-in');
+            
+            // Trigger reflow
+            void factCard.offsetWidth;
+            
+            factCard.classList.add('fade-in');
+            
+            const fact = galaxyFacts.galaxy_facts[index];
+            document.getElementById('factText').textContent = fact.fact;
+            document.getElementById('category').textContent = fact.category.replace('_', ' ');
+            document.getElementById('currentIndex').textContent = index + 1;
+            document.getElementById('totalFacts').textContent = galaxyFacts.galaxy_facts.length;
+        }
+
+        function nextFact() {
+            factHistory.push(currentIndex);
+            currentIndex = (currentIndex + 1) % galaxyFacts.galaxy_facts.length;
+            displayFact(currentIndex);
+        }
+
+        function previousFact() {
+            if (factHistory.length > 0) {
+                currentIndex = factHistory.pop();
+                displayFact(currentIndex);
+            }
+        }
+
+        function randomFact() {
+            factHistory.push(currentIndex);
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * galaxyFacts.galaxy_facts.length);
+            } while (newIndex === currentIndex && galaxyFacts.galaxy_facts.length > 1);
+            
+            currentIndex = newIndex;
+            displayFact(currentIndex);
+        }
+
+        // Initialize with first fact
+        displayFact(0);
+    </script>
+</body>
+</html>
